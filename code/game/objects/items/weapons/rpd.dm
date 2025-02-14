@@ -211,7 +211,7 @@
 		return
 // TGUI stuff
 
-/obj/item/rpd/attack_self(mob/user)
+/obj/item/rpd/attack_self__legacy__attackchain(mob/user)
 	ui_interact(user)
 
 /obj/item/rpd/ui_state(mob/user)
@@ -304,7 +304,7 @@
 				return //Either nothing was selected, or an invalid mode was selected
 		to_chat(user, "<span class='notice'>You set [src]'s mode.</span>")
 
-/obj/item/rpd/afterattack(atom/target, mob/user, proximity)
+/obj/item/rpd/afterattack__legacy__attackchain(atom/target, mob/user, proximity)
 	..()
 	if(isstorage(target))
 		var/obj/item/storage/S = target
@@ -342,7 +342,7 @@
 
 	// If we get here, then we're effectively acting on the turf, probably placing a pipe.
 	if(ranged) //woosh beam if bluespaced at a distance
-		if(get_dist(src, T) >= (user.client.maxview() + 2))
+		if(get_dist(src, T) >= (user.client.maxview() / 2))
 			message_admins("\[EXPLOIT] [key_name_admin(user)] attempted to place pipes with a BRPD via a camera console. (Attempted range exploit)")
 			playsound(src, 'sound/machines/synth_no.ogg', 15, TRUE)
 			to_chat(user, "<span class='notice'>ERROR: \The [T] is out of [src]'s range!</span>")
@@ -355,7 +355,7 @@
 		user.Beam(T, icon_state = "rped_upgrade", icon = 'icons/effects/effects.dmi', time = 0.5 SECONDS)
 	T.rpd_act(user, src)
 
-/obj/item/rpd/attack_obj(obj/O, mob/living/user)
+/obj/item/rpd/attack_obj__legacy__attackchain(obj/O, mob/living/user)
 	if(user.a_intent != INTENT_HARM)
 		if(istype(O, /obj/machinery/atmospherics/pipe))
 			return

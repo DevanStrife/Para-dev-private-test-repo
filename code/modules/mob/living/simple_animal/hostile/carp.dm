@@ -33,7 +33,7 @@
 	atmos_requirements = list("min_oxy" = 0, "max_oxy" = 0, "min_tox" = 0, "max_tox" = 0, "min_co2" = 0, "max_co2" = 0, "min_n2" = 0, "max_n2" = 0)
 	minbodytemp = 0
 	maxbodytemp = 1500
-	faction = list("carp")
+	faction = list("carp", "mining")
 	pressure_resistance = 200
 	gold_core_spawnable = HOSTILE_SPAWN
 
@@ -66,6 +66,7 @@
 	. = ..()
 	carp_randomify(rarechance)
 	update_icons()
+	AddComponent(/datum/component/swarming)
 
 /mob/living/simple_animal/hostile/carp/proc/carp_randomify(rarechance)
 	if(random_color)
@@ -92,7 +93,7 @@
 	base_dead_overlay.appearance_flags = RESET_COLOR
 	add_overlay(base_dead_overlay)
 
-/mob/living/simple_animal/hostile/carp/Process_Spacemove(movement_dir = 0)
+/mob/living/simple_animal/hostile/carp/Process_Spacemove(movement_dir = 0, continuous_move = FALSE)
 	return TRUE	//No drifting in space for space carp!	//original comments do not steal
 
 /mob/living/simple_animal/hostile/carp/AttackingTarget()

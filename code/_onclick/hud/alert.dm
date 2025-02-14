@@ -100,7 +100,7 @@
 	icon = 'icons/mob/screen_alert.dmi'
 	icon_state = "default"
 	name = "Alert"
-	desc = "Something seems to have gone wrong with this alert, so report this bug please"
+	desc = "Something seems to have gone wrong with this alert, so report this bug please."
 	mouse_opacity = MOUSE_OPACITY_ICON
 	/// How long before this alert automatically clears itself (in deciseconds). If zero, remains until cleared.
 	var/timeout = 0
@@ -514,7 +514,7 @@ so as to remain in compliance with the most up-to-date laws."
 	var/mob/living/silicon/ai/AI = usr
 	var/turf/T = get_turf(target)
 	if(T)
-		AI.eyeobj.setLoc(T)
+		AI.eyeobj.set_loc(T)
 
 //MECHS
 /atom/movable/screen/alert/low_mech_integrity
