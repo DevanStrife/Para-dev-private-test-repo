@@ -102,6 +102,8 @@
 			render_target = ref(src)
 			em_block = new(src, render_target)
 			add_overlay(list(em_block))
+	if(opacity)
+		AddElement(/datum/element/light_blocking)
 
 /atom/movable/proc/update_emissive_block()
 	if(!em_block && !QDELETED(src))
@@ -110,7 +112,6 @@
 	add_overlay(list(em_block))
 
 /atom/movable/Destroy()
-	var/turf/T = loc
 	unbuckle_all_mobs(force = TRUE)
 	QDEL_NULL(em_block)
 
@@ -131,15 +132,15 @@
 			qdel(move_packet)
 		move_packet = null
 
-	if(opacity && istype(T))
-		var/old_has_opaque_atom = T.has_opaque_atom
-		T.recalc_atom_opacity()
-		if(old_has_opaque_atom != T.has_opaque_atom)
-			T.reconsider_lights()
+	if(opacity)
+		RemoveElement(/datum/element/light_blocking)
 
 //Returns an atom's power cell, if it has one. Overload for individual items.
 /atom/movable/proc/get_cell()
 	return
+
+/atom/movable/proc/compressor_grind()
+	ex_act(EXPLODE_DEVASTATE)
 
 /atom/movable/proc/start_pulling(atom/movable/AM, state, force = pull_force, show_message = FALSE)
 	if(QDELETED(AM))
@@ -236,6 +237,7 @@
 /// To be removed on step_ conversion.
 /// All this work to prevent a second bump.
 /atom/movable/Move(atom/newloc, direction, glide_size_override = 0, update_dir = TRUE, momentum_change = TRUE)
+	CAN_BE_REDEFINED(TRUE)
 	. = FALSE
 	if(!newloc || newloc == loc)
 		return
@@ -385,6 +387,7 @@
 		set_glide_size(glide_size_override)
 
 	last_move = direct
+	l_move_time = world.time
 
 	if(. && has_buckled_mobs() && !handle_buckled_mob_movement(loc, direct, glide_size_override)) //movement failed due to buckled mob
 		. = FALSE
@@ -431,6 +434,10 @@
 		if(!(puller.appearance_flags & LONG_GLIDE) && (appearance_flags & LONG_GLIDE))
 			new_glide_size /= sqrt(2)
 	set_glide_size(new_glide_size)
+	if(isliving(src))
+		var/mob/living/M = src
+		if(IS_HORIZONTAL(M) && !M.buckled && (prob(M.getBruteLoss() * 200 / M.maxHealth))) // So once you reach 50 brute damage you hit 100% chance to leave a blood trail for every tile you're pulled
+			M.makeTrail(target_turf)
 	Move(target_turf, pull_dir)
 	moving_from_pull = null
 
@@ -953,14 +960,6 @@
 /atom/movable/proc/stop_deadchat_plays()
 	DeleteComponent(/datum/component/deadchat_control)
 
-/atom/movable/vv_get_dropdown()
-	. = ..()
-	if(!GetComponent(/datum/component/deadchat_control))
-		.["Give deadchat control"] = "byond://?_src_=vars;grantdeadchatcontrol=[UID()]"
-	else
-		.["Remove deadchat control"] = "byond://?_src_=vars;removedeadchatcontrol=[UID()]"
-
-
 //Update the screentip to reflect what we're hovering over
 /atom/movable/MouseEntered(location, control, params)
 	if(invisibility > usr.see_invisible)
@@ -1045,7 +1044,7 @@
 
 	var/has_tried_to_move = FALSE
 
-	if(is_blocked_turf(target_turf, TRUE, excluded_objs = list(src)))
+	if(target_turf.is_blocked_turf(exclude_mobs = TRUE, ignore_atoms = list(src)))
 		has_tried_to_move = TRUE
 		if(!Move(target_turf, crush_dir))
 			// we'll try to move, and if we didn't end up going anywhere, then we do nothing.
@@ -1131,7 +1130,7 @@
 		throw_at(target, 1, 1, spin = FALSE)
 	if(rightable)
 		layer = ABOVE_MOB_LAYER
-		AddComponent(/datum/component/tilted, 14 SECONDS, block_interactions_until_righted, rot_angle)
+		AddComponent(/datum/component/tilted, 4 SECONDS, block_interactions_until_righted, rot_angle)
 
 /// Untilt a tilted object.
 /atom/movable/proc/untilt(mob/living/user, duration = 10 SECONDS)

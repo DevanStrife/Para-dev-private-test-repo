@@ -14,7 +14,6 @@
 /datum/gear/racial
 	sort_category = "Racial"
 	main_typepath = /datum/gear/racial
-	cost = 1
 
 /datum/gear/racial/taj
 	display_name = "Tajaran veil"
@@ -53,3 +52,21 @@
 	display_name = "Tactical Suit"
 	description = "Plasmaman envirosuit supplied by black markets. Forged on Boron. Does not have suit sensors."
 	path = /obj/item/storage/box/tacticool_envirosuit
+
+/datum/gear/racial/plasmamansuit_chapbw
+	display_name = "Chaplain suit, black and white"
+	description = "Envirosuit for pious plasmamen in black and white."
+	path =/obj/item/storage/box/chapbw_envirosuit
+	allowed_roles = list("Chaplain")
+
+/datum/gear/racial/plasmamansuit_chapwg
+	display_name = "Chaplain suit, white and green"
+	description = "Envirosuit for pious plasmamen in white and green."
+	path = /obj/item/storage/box/chapwg_envirosuit
+	allowed_roles = list("Chaplain")
+
+/datum/gear/racial/plasmamansuit_chapco
+	display_name = "Chaplain suit, blue and orange"
+	description = "Envirosuit for pious plasmamen in blue and orange."
+	path = /obj/item/storage/box/chapco_envirosuit
+	allowed_roles = list("Chaplain")
