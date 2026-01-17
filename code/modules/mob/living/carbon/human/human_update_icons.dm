@@ -104,10 +104,9 @@ Please contact me on #coderbus IRC. ~Carn x
 */
 
 /mob/living/carbon/human/proc/apply_overlay(cache_index)
-	. = overlays_standing[cache_index]
-	SEND_SIGNAL(src, COMSIG_CARBON_APPLY_OVERLAY, cache_index, .)
-	if(.)
-		add_overlay(.)
+	SEND_SIGNAL(src, COMSIG_CARBON_APPLY_OVERLAY, cache_index)
+	if(overlays_standing[cache_index])
+		add_overlay(overlays_standing[cache_index])
 
 /mob/living/carbon/human/proc/remove_overlay(cache_index)
 	var/I = overlays_standing[cache_index]
@@ -257,7 +256,7 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 			underwear_standing.Blend(new /icon(u_icon, "uw_[U.icon_state]_s"), ICON_OVERLAY)
 
 	if(undershirt && dna.species.clothing_flags & HAS_UNDERSHIRT)
-		var/datum/sprite_accessory/undershirt/U2 = GLOB.undershirt_list[undershirt]
+		var/datum/sprite_accessory/undershirt/U2 = GLOB.undershirt_full_list[undershirt]
 		if(U2)
 			var/u2_icon = U2.sprite_sheets && (dna.species.sprite_sheet_name in U2.sprite_sheets) ? U2.sprite_sheets[dna.species.sprite_sheet_name] : U2.icon
 			underwear_standing.Blend(new /icon(u2_icon, "us_[U2.icon_state]_s"), ICON_OVERLAY)
@@ -275,6 +274,7 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 	//tail
 	update_tail_layer()
 	update_wing_layer()
+	update_spines_layer()
 	update_int_organs()
 	//head accessory
 	update_head_accessory()
@@ -421,7 +421,7 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 		return
 
 	var/species_name = ""
-	if(dna.species.name in list("Drask", "Grey", "Vox", "Kidan"))
+	if(dna.species.name in list("Drask", "Grey", "Vox", "Kidan", "Skkulakin"))
 		species_name = "_[lowertext(dna.species.sprite_sheet_name)]"
 
 	var/icon/hands_mask = icon('icons/mob/body_accessory.dmi', "accessory_none_s") //Needs a blank icon, not actually related to markings at all
@@ -562,6 +562,7 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 	force_update_limbs()
 	update_tail_layer()
 	update_wing_layer()
+	update_spines_layer()
 	update_halo_layer()
 	update_eyes_overlay_layer()
 	overlays.Cut() // Force all overlays to regenerate
@@ -887,6 +888,7 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 	apply_overlay(SUIT_LAYER)
 	update_tail_layer()
 	update_wing_layer()
+	update_spines_layer()
 	update_collar()
 
 /mob/living/carbon/human/update_inv_pockets()
@@ -971,7 +973,7 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 		else
 			worn_layer = NECK_LAYER
 
-		var/mutable_appearance/standing = mutable_appearance(worn_icon, worn_icon_state, layer = -worn_layer)
+		var/mutable_appearance/standing = mutable_appearance(worn_icon, worn_icon_state, layer = -worn_layer, alpha = neck.alpha, color = neck.color)
 
 		overlays_standing[worn_layer] = standing
 		apply_overlay(worn_layer)
@@ -1146,12 +1148,11 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 	if(!istype(body_accessory, /datum/body_accessory/wing))
 		if(dna.species.optional_body_accessory)
 			return
-		else
-			body_accessory = GLOB.body_accessory_by_name[dna.species.default_bodyacc]
-
+		if(istype(body_accessory, /datum/body_accessory/spines))
+			return // fuck right off thanks
+		body_accessory = GLOB.body_accessory_by_name[dna.species.default_bodyacc]
 	if(!body_accessory.try_restrictions(src))
 		return
-
 	var/icon/wings_icon = new /icon(body_accessory.icon, body_accessory.icon_state)
 	if(HAS_TRAIT(src, TRAIT_I_WANT_BRAINS))
 		wings_icon.ColorTone(COLORTONE_DEAD_EXT_ORGAN)
@@ -1174,7 +1175,49 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 	apply_overlay(WING_UNDERLIMBS_LAYER)
 	apply_overlay(WING_LAYER)
 
+/mob/living/carbon/human/proc/update_spines_layer()
+	remove_overlay(SPINES_UNDERLIMBS_LAYER)
+	remove_overlay(SPINES_LAYER)
+	if(!istype(body_accessory, /datum/body_accessory/spines))
+		if(dna.species.optional_body_accessory)
+			return
+		if(istype(body_accessory, /datum/body_accessory/wing))
+			return // See above
+		body_accessory = GLOB.body_accessory_by_name[dna.species.default_bodyacc]
+	if(!body_accessory.try_restrictions(src))
+		return
+
+	var/icon/spines_icon = new /icon(body_accessory.icon, spines)
+	if(HAS_TRAIT(src, TRAIT_I_WANT_BRAINS))
+		spines_icon.ColorTone(COLORTONE_DEAD_EXT_ORGAN)
+		spines_icon.SetIntensity(0.7)
+	var/mutable_appearance/spines_ma = mutable_appearance(spines_icon, layer = -SPINES_LAYER)
+	spines_ma.pixel_x = body_accessory.pixel_x_offset
+	spines_ma.pixel_y = body_accessory.pixel_y_offset
+	overlays_standing[SPINES_LAYER] = spines_ma
+
+	if(body_accessory.has_behind)
+		var/icon/under_spines_icon = new /icon(body_accessory.icon, "[spines]_BEHIND")
+		if(HAS_TRAIT(src, TRAIT_I_WANT_BRAINS))
+			under_spines_icon.ColorTone(COLORTONE_DEAD_EXT_ORGAN)
+			under_spines_icon.SetIntensity(0.7)
+		var/mutable_appearance/under_spines = mutable_appearance(under_spines_icon, layer = -SPINES_UNDERLIMBS_LAYER)
+		under_spines.pixel_x = body_accessory.pixel_x_offset
+		under_spines.pixel_y = body_accessory.pixel_y_offset
+		overlays_standing[SPINES_UNDERLIMBS_LAYER] = under_spines
+
+	apply_overlay(SPINES_UNDERLIMBS_LAYER)
+	apply_overlay(SPINES_LAYER)
+
+// Warning to all that come here: This proc is also used to properly render nian wings and skulk spines. Also it sucks. Have fun!
 /mob/living/carbon/human/proc/update_tail_layer()
+	// If the tail is currently wagging, don't stop wagging.
+	if(tail_wagging)
+		if(wear_suit?.flags_inv & HIDETAIL)
+			stop_tail_wagging()
+		else
+			start_tail_wagging()
+		return
 	remove_overlay(TAIL_UNDERLIMBS_LAYER) // SEW direction icons, overlayed by LIMBS_LAYER.
 	remove_overlay(TAIL_LAYER) /* This will be one of two things:
 							If the species' tail is overlapped by limbs, this will be only the N direction icon so tails
@@ -1191,7 +1234,11 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 
 	if(body_accessory)
 		if(body_accessory.try_restrictions(src))
-			var/icon/accessory_s = new/icon("icon" = body_accessory.icon, "icon_state" = body_accessory.icon_state)
+			var/icon/accessory_s
+			if(istype(body_accessory, /datum/body_accessory/spines))
+				accessory_s = new/icon("icon" = body_accessory.icon, "icon_state" = spines)
+			else
+				accessory_s = new/icon("icon" = body_accessory.icon, "icon_state" = body_accessory.icon_state)
 			if(HAS_TRAIT(src, TRAIT_I_WANT_BRAINS))
 				accessory_s.ColorTone(COLORTONE_DEAD_EXT_ORGAN)
 				accessory_s.SetIntensity(0.7)
@@ -1261,6 +1308,7 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 	apply_overlay(TAIL_UNDERLIMBS_LAYER)
 
 /mob/living/carbon/human/proc/start_tail_wagging()
+	tail_wagging = TRUE
 	remove_overlay(TAIL_UNDERLIMBS_LAYER) // SEW direction icons, overlayed by LIMBS_LAYER.
 	remove_overlay(TAIL_LAYER) /* This will be one of two things:
 							If the species' tail is overlapped by limbs, this will be only the N direction icon so tails
@@ -1340,6 +1388,7 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 	apply_overlay(TAIL_UNDERLIMBS_LAYER)
 
 /mob/living/carbon/human/proc/stop_tail_wagging()
+	tail_wagging = FALSE
 	remove_overlay(TAIL_UNDERLIMBS_LAYER)
 	remove_overlay(TAIL_LAYER)
 	update_tail_layer() //just trigger a full update for normal stationary sprites
@@ -1373,8 +1422,7 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 
 /mob/living/carbon/human/handle_transform_change()
 	..()
-	update_tail_layer()
-	update_wing_layer()
+	update_body()
 
 //Adds a collar overlay above the helmet layer if the suit has one
 //	Suit needs an identically named sprite in icons/mob/clothing/collar.dmi

@@ -117,9 +117,10 @@
 #define BALD				(1<<14)
 #define ALL_RPARTS			(1<<15)
 #define SHAVED				(1<<16)
+#define HAS_BACK_SPINES		(1<<17)
 
 //Pre-baked combinations of the above body flags
-#define HAS_BODY_ACCESSORY 	(HAS_TAIL | HAS_WING)
+#define HAS_BODY_ACCESSORY 	(HAS_TAIL | HAS_WING | HAS_BACK_SPINES)
 #define HAS_MARKINGS		(HAS_HEAD_MARKINGS | HAS_BODY_MARKINGS | HAS_TAIL_MARKINGS)
 
 //Species Diet Flags
@@ -188,6 +189,7 @@
 #define ZAP_SUPERMATTER_FLAGS (ZAP_GENERATES_POWER)
 
 GLOBAL_LIST_INIT(bitflags, list(1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768))
+GLOBAL_LIST_INIT(more_bitflags, list(1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288))
 
 //Mob mobility var flags
 /// can move

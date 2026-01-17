@@ -7,7 +7,7 @@
 
 /obj/item/food/burger
 	name = "burger"
-	desc = "If you got this, something broke! Contact a coder if this somehow spawns."
+	desc = ABSTRACT_TYPE_DESC
 	icon = 'icons/obj/food/burgerbread.dmi'
 	icon_state = "burger"
 
@@ -305,7 +305,7 @@
 
 /obj/item/food/burger/mcrib
 	name = "mcRib"
-	desc = "An elusive rib shaped burger with limited availablity across the galaxy. Not as good as you remember it."
+	desc = "An elusive rib-shaped burger with limited availability across the galaxy. Not as good as you remember it."
 	icon_state = "mcrib"
 	bitesize = 3
 	filling_color = "#F2B6EA"
@@ -383,17 +383,18 @@
 	tastes = list("toast" = 1, "jelly" = 1)
 
 /obj/item/food/jellysandwich/slime
+	name = "slime sandwich"
 	list_reagents = list("nutriment" = 2, "slimejelly" = 5, "vitamin" = 2)
 	goal_difficulty = FOOD_GOAL_NORMAL
 
 /obj/item/food/jellysandwich/cherry
-	name = "slime sandwich"
+	name = "cherry sandwich"
 	list_reagents = list("nutriment" = 2, "cherryjelly" = 5, "vitamin" = 2)
 	goal_difficulty = FOOD_GOAL_NORMAL
 
 /obj/item/food/notasandwich
 	name = "not-a-sandwich"
-	desc = "Something seems to be wrong with this, you can't quite figure what. Maybe it's his moustache."
+	desc = "Something seems to be wrong with this, but you can't quite figure out what. Maybe it's his moustache."
 	icon = 'icons/obj/food/burgerbread.dmi'
 	icon_state = "notasandwich"
 	list_reagents = list("nutriment" = 6, "vitamin" = 6)
@@ -495,9 +496,9 @@
 	..()
 	if(!HAS_TRAIT(M, TRAIT_SUPERMATTER_IMMUNE))
 		M.visible_message(
-			"<span class='danger'>[M] lifts [src] up to [M.p_their()] mouth and bites down, inducing a resonance... [M.p_their(TRUE)] body starts to glow and burst into flames before flashing into dust!</span>",
-			"<span class='userdanger'>You bite down on [src].<br><br> Everything starts burning and all you can hear is ringing. Your final thought is: \"OH FU-\"</span>",
-			"<span class='danger'>A deafening resonance fills the air, followed by silence...</span>"
+			SPAN_DANGER("[M] lifts [src] up to [M.p_their()] mouth and bites down, inducing a resonance... [M.p_their(TRUE)] body starts to glow and burst into flames before flashing into dust!"),
+			SPAN_USERDANGER("You bite down on [src].<br><br> Everything starts burning and all you can hear is ringing. Your final thought is: \"OH FU-\""),
+			SPAN_DANGER("A deafening resonance fills the air, followed by silence...")
 		)
 		radiation_pulse(src, 2000, GAMMA_RAD)
 		playsound(src, 'sound/effects/supermatter.ogg', 50, TRUE)
